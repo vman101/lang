@@ -1,7 +1,15 @@
+%include "./src/inc/token.s"
+
 section .data
     token: db 0xa, "Token ", 0
     type: db "type = ", 0
     value: db "value = ", 0
+    VAL_CONST: db "const", 0
+    VAL_VAR: db "variable", 0
+    VAL_OP_ADD: db "operator '+'", 0
+    VAL_OP_SUB: db "operator '-'", 0
+    VAL_OP_LOAD: db "operator '='", 0
+    VAL_FUNC: db "function call", 0
 
 section .text
     global print_tokens
@@ -11,11 +19,47 @@ section .text
     extern putnumberendl
     extern get_split_count
 
+print_token_type:   ; (rdi: int)
+    cmp rdi, TOK_LOAD
+    je .tok_load
+    cmp rdi, TOK_ADD
+    je .tok_add
+    cmp rdi, TOK_SUB
+    je .tok_sub
+    cmp rdi, TOK_CONST
+    je .tok_const
+    cmp rdi, TOK_VAR
+    je .tok_var
+    cmp rdi, TOK_FUNC
+    je .tok_func
 
+.tok_load:
+    mov rdi, VAL_OP_LOAD
+    jmp .print
 
-;   struct token
-;       .type   0
-;       .value  +8
+.tok_add:
+    mov rdi, VAL_OP_ADD
+    jmp .print
+
+.tok_sub:
+    mov rdi, VAL_OP_SUB
+    jmp .print
+
+.tok_const:
+    mov rdi, VAL_CONST
+    jmp .print
+
+.tok_var:
+    mov rdi, VAL_VAR
+    jmp .print
+
+.tok_func:
+    mov rdi, VAL_FUNC
+    jmp .print
+
+.print:
+    call putendl
+    ret
 
 print_tokens:       ; (rdi: tok*, rsi: tok_count)
     push rbp
@@ -49,9 +93,9 @@ print_tokens:       ; (rdi: tok*, rsi: tok_count)
     mul r12
     mov rbx, [rbp - 8]
     lea r13, [rbx + rax]
-    mov rdi, [r13]
+    mov rdi, [r13 + TOK_TYPE]
     push rax
-    call putnumberendl
+    call print_token_type
 
     mov rdi, value
     call putstr
@@ -59,7 +103,7 @@ print_tokens:       ; (rdi: tok*, rsi: tok_count)
 
     mov rbx, [rbp - 8]
     lea r13, [rbx + rax]
-    mov rdi, [r13 + 8]
+    mov rdi, [r13 + TOK_VALUE]
 
     call putendl
     mov rcx, r12

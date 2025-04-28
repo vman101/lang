@@ -13,7 +13,7 @@ MATHSRC := $(addprefix $(MATHDIR)/, $(addsuffix .s, \
             operators \
             ))
 STRSRC := $(addprefix $(STRDIR)/, $(addsuffix .s, \
-            strlen split strcpy substr is_num strcmp\
+            strlen split strcpy substr is_num strcmp is_alpha \
             ))
 MEMSRC := $(addprefix $(MEMDIR)/, $(addsuffix .s, \
             malloc memchr \
@@ -28,7 +28,8 @@ SYSCALLSRC := $(addprefix $(SYSCALLDIR)/, $(addsuffix .s, \
             exit file_ops syscall_err\
             ))
 PARSESRC := $(addprefix $(PARSEDIR)/, $(addsuffix .s, \
-            parse debug_token create_expressions expression debug_expression \
+            parse debug_token create_expressions debug_expression \
+			lexer \
             ))
 
 # Collect all source files - now using the file variables, not directory variables

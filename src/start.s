@@ -23,6 +23,7 @@ section .text
     extern err_malloc
     extern get_file_content
     extern create_expressions
+    extern lex
 
 print_usage:
     mov rdi, usage
@@ -40,8 +41,10 @@ _start:
 
     call get_file_content
     mov rdi, rax
-    call create_expressions
     mov [rbp - 8], rax
+
+    mov rdi, rax
+    call lex
 
     mov rsp, rbp
     pop rbp

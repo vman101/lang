@@ -78,7 +78,7 @@ split:              ; RAX: char ** split(RDI: char *, RSI: int)
     mov [rbp - 16], rax
     mov rcx, rax
 
-    cmp rbx, 1
+    cmp rbx, 0
     je .no_match
 
     call strlen

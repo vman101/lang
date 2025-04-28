@@ -1,11 +1,24 @@
-%define SIZE_TOK 16
-%define TOK_ASSIGN 0
-%define TOK_ADD 1
-%define TOK_PRINT 2
-%define TOK_VAR 3
-%define TOK_CONST 4
+%include "./src/inc/token.s"
 
 section .data
+    global VAL_CONST
+    VAL_CONST: db "const", 0
+
+    global VAL_VAR
+    VAL_VAR: db "variable", 0
+
+    global VAL_OP_ADD
+    VAL_OP_ADD: db "operator '+'", 0
+
+    global VAL_OP_SUB
+    VAL_OP_SUB: db "operator '-'", 0
+
+    global VAL_OP_LOAD
+    VAL_OP_LOAD: db "operator '='", 0
+
+    global VAL_FUNC
+    VAL_FUNC: db "function call", 0
+
     OP_ASSIGN: db "=", 0
     OP_ADD: db "+", 0
     OP_PRINT: db "print", 0
@@ -19,11 +32,6 @@ section .text
     extern putendl
     extern putnumberendl
     extern get_split_count
-
-
-;   struct token
-;       .type   0
-;       .value  +8
 
 
 token_alloc:    ; rax: tok* (rdi: int cnt)
@@ -81,7 +89,7 @@ parse:          ; rax: tok* (rdi: char**)
 .is_assign:
     pop rcx
     push rdi
-    mov rdi, TOK_ASSIGN
+    mov rdi, TOK_LOAD
     jmp .set_token
 
 .is_add:
@@ -93,7 +101,7 @@ parse:          ; rax: tok* (rdi: char**)
 .is_print:
     pop rcx
     push rdi
-    mov rdi, TOK_PRINT
+    mov rdi, TOK_FUNC
     jmp .set_token
 
 .is_const:

@@ -1,4 +1,4 @@
-%include "./lang/src/inc/macros.inc"
+%include "./src/inc/expression.s"
 
 section .text
     global create_expressions
@@ -11,10 +11,12 @@ section .text
     extern print_expression
 
 
-create_expressions:         ; rax: exp* (rdi: char *filecontent)
+create_expressions:         ; rax: exp* (rdi: char *filecontent, rsi: *cnt)
     push rbp
     mov rbp, rsp
     sub rsp, 32             ; allocate stack
+
+    push rsi
 
     mov rsi, 0x0a
     call split
@@ -55,7 +57,7 @@ create_expressions:         ; rax: exp* (rdi: char *filecontent)
 .splitting_done:
 
     ; allocate expressions
-    mov rax, [expr_size]
+    mov rax, EXPR_SIZE
     mul rcx                 ; rcx contains the amount of splits aka expr count
     mov rdi, rax
     call malloc
@@ -88,10 +90,8 @@ create_expressions:         ; rax: exp* (rdi: char *filecontent)
     mul rcx
     lea rax, [rbx + rax]
     pop rbx
-    mov rdx, [expr_tok]
-    mov [rax + rdx], rbx
-    mov rdx, [expr_tok_cnt]
-    mov [rax + rdx], rdi
+    mov [rax + EXPR_TOK], rbx
+    mov [rax + EXPR_TOK_CNT], rdi
     inc rcx
     jmp .loop_expressions
 
@@ -114,6 +114,9 @@ create_expressions:         ; rax: exp* (rdi: char *filecontent)
     jmp .expr_loop_print
 
 .done:
+    pop rsi
+    mov rdi, [rbp - 24]
+    mov dword [rsi], edi
     mov rax, [rbp - 16]
     add rsp, 32
     mov rsp, rbp

@@ -3,10 +3,10 @@ section .text
     global is_num_str
 
 is_num:         ; rax: bool (rdi: int c)
-    cmp rdi, 48
-    jl not_num
-    cmp rdi, 57
-    jg not_num
+    sub dil, '0'
+    cmp dil, 9
+    jnc not_num
+
     mov rax, 1
     ret
 not_num:
