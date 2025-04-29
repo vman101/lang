@@ -21,6 +21,7 @@ section .data
 
     OP_ASSIGN: db "=", 0
     OP_ADD: db "+", 0
+    OP_SUB: db "-", 0
     OP_PRINT: db "print", 0
 
 section .text
@@ -71,6 +72,10 @@ parse:          ; rax: tok* (rdi: char**)
     call strcmp
     cmp rax, 0
     je .is_assign
+    mov rsi, OP_SUB
+    call strcmp
+    cmp rax, 0
+    je .is_sub
     mov rsi, OP_ADD
     call strcmp
     cmp rax, 0
@@ -90,6 +95,12 @@ parse:          ; rax: tok* (rdi: char**)
     pop rcx
     push rdi
     mov rdi, TOK_LOAD
+    jmp .set_token
+
+.is_sub:
+    pop rcx
+    push rdi
+    mov rdi, TOK_SUB
     jmp .set_token
 
 .is_add:

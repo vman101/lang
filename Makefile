@@ -7,6 +7,7 @@ MEMDIR := $(COREDIR)/mem
 SYSCALLDIR := $(COREDIR)/syscall
 FILEDIR := $(COREDIR)/file
 PARSEDIR := $(SRCDIR)/parse
+VARDIR := $(PARSEDIR)/vars
 
 # Define source files
 MATHSRC := $(addprefix $(MATHDIR)/, $(addsuffix .s, \
@@ -29,11 +30,15 @@ SYSCALLSRC := $(addprefix $(SYSCALLDIR)/, $(addsuffix .s, \
             ))
 PARSESRC := $(addprefix $(PARSEDIR)/, $(addsuffix .s, \
             parse debug_token create_expressions debug_expression \
-			lexer \
+			lexer lex_load lex_err \
+            ))
+
+VARSRC := $(addprefix $(VARDIR)/, $(addsuffix .s, \
+			get_vars insert_var \
             ))
 
 # Collect all source files - now using the file variables, not directory variables
-SRC := $(SRCDIR)/start.s $(MATHSRC) $(STRSRC) $(PRINTSRC) $(FILESRC) $(PARSESRC) $(SYSCALLSRC) $(MEMSRC)
+SRC := $(SRCDIR)/start.s $(MATHSRC) $(STRSRC) $(PRINTSRC) $(FILESRC) $(VARSRC) $(PARSESRC) $(SYSCALLSRC) $(MEMSRC)
 
 OBJDIR := obj
 OBJ := $(patsubst %.s,$(OBJDIR)/%.o,$(notdir $(SRC)))
@@ -66,6 +71,9 @@ $(OBJDIR)/%.o: $(FILEDIR)/%.s
 	nasm -felf64 -F dwarf -g $< -o $@
 
 $(OBJDIR)/%.o: $(PARSEDIR)/%.s
+	nasm -felf64 -F dwarf -g $< -o $@
+
+$(OBJDIR)/%.o: $(VARDIR)/%.s
 	nasm -felf64 -F dwarf -g $< -o $@
 
 $(OBJDIR): 

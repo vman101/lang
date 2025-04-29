@@ -2,9 +2,10 @@
 %define LEX_VAR_CNT     4
 %define LEX_EXPR        8
 %define LEX_VAR         16
-%define LEX_OUT         24
+%define LEX_EXPR_IDX    24
+%define LEX_OUT         32
 
-%define LEX_SIZE    32
+%define LEX_SIZE    64
 
 %define VAR_NAME 0
 %define VAR_OFFS 8
@@ -19,4 +20,5 @@
 ;   .var_cnt    4
 ;   .expr*      8
 ;   .vars       16
-;   .output**   24
+;   .expr_idx   24
+;   .output**   32

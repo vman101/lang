@@ -4,12 +4,6 @@ section .data
     token: db 0xa, "Token ", 0
     type: db "type = ", 0
     value: db "value = ", 0
-    VAL_CONST: db "const", 0
-    VAL_VAR: db "variable", 0
-    VAL_OP_ADD: db "operator '+'", 0
-    VAL_OP_SUB: db "operator '-'", 0
-    VAL_OP_LOAD: db "operator '='", 0
-    VAL_FUNC: db "function call", 0
 
 section .text
     global print_tokens
@@ -18,7 +12,14 @@ section .text
     extern putchar
     extern putnumberendl
     extern get_split_count
+    extern VAL_CONST
+    extern VAL_VAR
+    extern VAL_OP_ADD
+    extern VAL_OP_SUB
+    extern VAL_OP_LOAD
+    extern VAL_FUNC
 
+global print_token_type
 print_token_type:   ; (rdi: int)
     cmp rdi, TOK_LOAD
     je .tok_load
