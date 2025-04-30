@@ -1,3 +1,4 @@
 [executable]
-path=/home/victor/git/lang/debug
-arguments=/home/victor/git/lang/test.lang
+path=/sgoinfre/vvobis/git/personal/lang/debug
+arguments=/sgoinfre/vvobis/git/personal/lang/test.lang
+ask_directory=1

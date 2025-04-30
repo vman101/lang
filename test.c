@@ -1,11 +1,24 @@
-#include <string.h>
-#include <unistd.h>
-#include "../libft/libft.h"
+#include <stdio.h>
 
 int main(int argc, char **argv) {
-    ft_split(argv[1], *argv[2]);
-    for (int i = 0; i < 2; i++)
-    {
-        write(1, argv[i + 1], strlen(argv[i + 1]));
+
+    int a = 17;
+
+    switch (a) {
+        case 1:
+            break ;
+        case 2:
+            break ;
+        case 3:
+            break ;
+        case 4:
+            break ;
+        case 5:
+            break ;
+        case 6:
+            break ;
+        case 17:
+            a = 0xfffaaaaf;
+            break ;
     }
 }

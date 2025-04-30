@@ -1,7 +1,6 @@
 %include "./src/inc/lexer.s"
 %include "./src/inc/expression.s"
 %include "./src/inc/token.s"
-%include "./src/inc/regs.s"
 
 section .text
     extern malloc
@@ -26,6 +25,8 @@ section .text
     extern op_var_rax
     extern xor_reg
     extern look_up_var
+
+    extern REG_RAX
 
     extern lex_eexpect
     extern lex_eundefined
@@ -80,9 +81,13 @@ process_token:      ; rax: new_last_tok_type (rdi: lex*, rsi: *tok, rdx: last_to
     jmp .done
 
 .process_const:
-    mov rsi, [rsi + TOK_VALUE]
+    push rdi
+    mov rdi, [rsi + TOK_VALUE]
     mov rsi, rdx
+
     call op_const_rax
+
+    pop rdi
     mov rax, TOK_CONST
     jmp .done
 
@@ -103,7 +108,7 @@ process_token:      ; rax: new_last_tok_type (rdi: lex*, rsi: *tok, rdx: last_to
 .done:
     ret
 
-is_assignment:    ; rax: OFF_S (rdi: expr*)
+is_load:    ; rax: OFF_S (rdi: expr*)
     xor rax, rax
 
     mov rcx, [rdi + EXPR_TOK_CNT]
@@ -120,7 +125,7 @@ is_assignment:    ; rax: OFF_S (rdi: expr*)
 .done:
     ret
 
-lex_load:     ; (rdi: lex*)
+lex_load:     ; rax: bool (rdi: lex*)
     push rbp
     mov rbp, rsp
     sub rsp, 48
@@ -144,7 +149,7 @@ lex_load:     ; (rdi: lex*)
 
     mov rdi, [rbp - 16]
     push rdi
-    call is_assignment
+    call is_load
     test rax, rax
     jz .done_false
 
@@ -166,6 +171,7 @@ lex_load:     ; (rdi: lex*)
     pop rdi
 
     ; advance token ptr
+    mov rdi, [rbp - 16]
     mov rsi, [rdi + EXPR_TOK]
 
     xor rcx, rcx
@@ -195,7 +201,11 @@ lex_load:     ; (rdi: lex*)
     mov rdi, [rbp - 40]
     call load_rax_var
     mov rax, 1
+    mov rsp, rbp
+    pop rbp
+    ret
 .done_false:
+    mov rax, 0
     mov rsp, rbp
     pop rbp
     ret

@@ -118,7 +118,7 @@ get_vars:           ; (rdi: lex*)
     mov eax, dword [rdi + LEX_EXPR_CNT]
     mov [rbp - 8], eax
     mov rax, [rdi + LEX_EXPR]
-    mov [rbp - 16], rax
+    mov [rbp - 16], rax         ; store expr*
 
     xor rcx, rcx
     push rcx

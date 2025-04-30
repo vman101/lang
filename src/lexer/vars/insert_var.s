@@ -1,7 +1,7 @@
 %include "./src/inc/token.s"
-%include "./src/inc/regs.s"
 
 section .data
+
     INST_MOV: db "mov ", 0
     INST_ADD: db "add ", 0
     INST_SUB: db "sub ", 0
@@ -10,7 +10,6 @@ section .data
     OPEN_STACK_VAR: db "[rbp-", 0
     CLOSE_STACK_VAR: db "]", 0
     SEP_INST: db ", ", 0
-
 
 section .text
     extern putstr
@@ -23,6 +22,8 @@ section .text
     extern VAL_OP_SUB
     extern VAL_OP_LOAD
     extern VAL_FUNC
+    extern REG_RAX
+    extern REG_RDI
 
 
 global insert_xor
@@ -66,6 +67,41 @@ xor_reg:               ; rdi: char*
     call putendl
 
     pop rbx
+    ret
+
+global load_reg_var
+load_reg_var:           ; (rdi: OFF_S, rsi: REG*)
+    push rsi
+    push rdi
+    call insert_mov
+
+    pop rdi
+    call insert_var
+
+    mov rdi, SEP_INST
+    call putstr
+
+    pop rdi
+    call putendl
+
+    ret
+
+global load_var_reg
+load_var_reg:           ; (rdi: OFF_S, rsi: REG*)
+    push rdi
+    push rsi
+
+    call insert_mov
+
+    pop rdi
+    call putstr
+
+    mov rdi, SEP_INST
+    call putstr
+
+    pop rdi
+    call insert_var_endl
+
     ret
 
 global load_rax_var

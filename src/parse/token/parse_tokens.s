@@ -33,7 +33,7 @@ section .text
     extern putendl
     extern putnumberendl
     extern get_split_count
-
+    extern look_up_func
 
 token_alloc:    ; rax: tok* (rdi: int cnt)
     mov rax, rdi
@@ -80,10 +80,9 @@ parse:          ; rax: tok* (rdi: char**)
     call strcmp
     cmp rax, 0
     je .is_add
-    mov rsi, OP_PRINT
-    call strcmp
-    cmp rax, 0
-    je .is_print
+    call look_up_func
+    cmp rax, 1
+    je .is_func
     push rdi
     call is_num_str
     pop rdi
@@ -109,7 +108,7 @@ parse:          ; rax: tok* (rdi: char**)
     mov rdi, TOK_ADD
     jmp .set_token
 
-.is_print:
+.is_func:
     pop rcx
     push rdi
     mov rdi, TOK_FUNC

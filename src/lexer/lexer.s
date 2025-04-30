@@ -2,33 +2,19 @@
 %include "./src/inc/lexer.s"
 %include "./src/inc/expression.s"
 %include "./src/inc/asm_output.s"
-%include "./src/inc/regs.s"
 
 section .text
     extern malloc
     extern err_malloc
     extern exit
     extern putstr
+
     extern create_expressions
     extern strcmp
-    extern VAL_OP_LOAD
-    extern VAL_OP_ADD
-    extern VAL_VAR
-    extern VAL_CONST
-    extern putchar
-    extern putnumber
-    extern putendl
     extern get_vars
-    extern insert_var
-    extern insert_mov
-    extern load_var_rax
-    extern load_rax_var
-    extern add_const_rax
-    extern add_var_rax
-    extern sub_const_rax
-    extern sub_var_rax
-    extern xor_reg
     extern lex_load
+    extern lex_func_call
+
     extern lex_eundefined
 
 
@@ -73,9 +59,14 @@ lex:            ; rax: lex* (rdi: char *file_content)
     push rcx
 
     call lex_load
+    test rax, rax
+    jnz .loop_epilog
+    mov rdi, [rbp - 24]
+    call lex_func_call
+    jnz .loop_epilog
 
+.loop_epilog:
     pop rcx
-
     inc dword [rcx]
 
     jmp .process_expressions
@@ -84,8 +75,6 @@ lex:            ; rax: lex* (rdi: char *file_content)
     mov rsp, rbp
     pop rbp
     ret
-
-
 
 global look_up_var
 look_up_var:        ; rax: bool (rdi: lex*, rsi: name*)
