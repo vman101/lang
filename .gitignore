@@ -2,3 +2,4 @@ vgcore*
 debug
 obj
 *.o
+.nfs*
