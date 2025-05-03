@@ -5,40 +5,44 @@ section .text
     extern err_malloc
     extern memcpy
 
+%define vec_count       dword [rbp - 4]
+%define vec_cap         dword [rbp - 8]
+%define vec_member_size dword [rbp - 12]
+%define vec_mem         [rbp - 20]
+
 global vec_push
 vec_push:           ; (rdi: vec*, rsi: mem*)
     push rbp
     mov rbp, rsp
     sub rsp, 48
 
-    mov eax, dword [rdi + VEC_COUNT]
-    mov dword [rbp - 4], eax
-    mov eax, dword [rdi + VEC_CAP]
-    mov dword [rbp - 8], eax
-    mov eax, dword [rdi + VEC_MEMBER_SIZE]
-    mov dword [rbp - 12], eax
-
-    mov [rbp - 24], rdi             ; store vec
+    mov eax, [rdi + VEC_COUNT]
+    mov vec_count, eax
+    mov eax, [rdi + VEC_CAP]
+    mov vec_cap, eax
+    mov eax, [rdi + VEC_MEMBER_SIZE]
+    mov vec_member_size, eax
     mov rax, [rdi + VEC_MEM]
-    mov [rbp - 32], rax
+    mov vec_mem, rax
+    mov [rbp - 32], rdi             ; store vec
 
     mov [rbp - 40], rsi
 
-    mov eax, dword [rbp - 4]
-    cmp eax, dword [rbp - 8]
+    mov eax, vec_count
+    cmp eax, vec_cap
     je .reallocate
 .push:
 
     mov rsi, [rbp - 40]
-    mov rdi, [rbp - 24]
+    mov rdi, [rbp - 32]
     mov eax, dword [rdi + VEC_MEMBER_SIZE]
-    imul eax, dword [rbp - 4]
+    imul eax, vec_count
     mov rdi, [rdi + VEC_MEM]
     add rdi, rax
 
-    mov edx, dword [rbp - 12]
+    mov edx, vec_member_size
     call memcpy
-    mov rdi, [rbp - 24]
+    mov rdi, [rbp - 32]
     inc dword [rdi + VEC_COUNT]
 
 .done:
@@ -55,11 +59,11 @@ vec_push:           ; (rdi: vec*, rsi: mem*)
     jz err_malloc
 
     mov rdi, rax
-    mov rsi, [rbp - 32]
-    mov edx, dword [rbp - 4]
+    mov rsi, vec_mem
+    mov edx, vec_count
     call memcpy
     pop rax
-    mov rdx, [rbp - 24]
+    mov rdx, [rbp - 32]
     mov [rdx + VEC_MEM], rdi
     mov dword [rdx + VEC_CAP], eax
     jmp .push

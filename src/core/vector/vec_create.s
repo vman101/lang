@@ -4,6 +4,7 @@ section .text
     extern malloc
     extern err_malloc
     extern memcpy
+    extern memset
 
 global vec_create
 vec_create:         ; rax: vec* (rdi: member_size)
@@ -18,6 +19,11 @@ vec_create:         ; rax: vec* (rdi: member_size)
     test rax, rax
     jz err_malloc
 
+    mov rdi, rax
+    mov rsi, 0
+    mov rdx, VEC_SIZE
+    call memset
+
     pop rdi
     mov [rbp - 8], rax      ; store vec
     mov dword [rax + VEC_COUNT], 0
@@ -26,9 +32,16 @@ vec_create:         ; rax: vec* (rdi: member_size)
 
     ; allocate initial vector capacity
     imul rdi, VEC_DEFAULT_CAP
+    push rdi
     call malloc
     test rax, rax
     jz err_malloc
+
+    pop rdi
+    mov rdx, rdi
+    mov rdi, rax
+    mov rsi, 0
+    call memset
 
     mov rdi, [rbp - 8]
     mov [rdi + VEC_MEM], rax

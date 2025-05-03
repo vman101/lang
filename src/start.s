@@ -12,6 +12,7 @@ section .text
     extern vec_push
     extern vec_get
     extern putchar
+    extern vec_pop
 
 print_usage:
     mov rdi, usage
@@ -27,7 +28,7 @@ _start:
     mov rdi, rax
 
     xor rcx, rcx
-    mov rbx, 95
+    mov rbx, 90
     mov r8, ' '
 
 .loop:
@@ -47,11 +48,14 @@ _start:
     jmp .loop
 .done:
     push rdi
+    call vec_pop
+    pop rdi
+    push rdi
     mov rdi, [rdi + 16]
     call putstr
     pop rdi
     lea rsi, [rbp - 1]
-    mov rdx, 94
+    mov rdx, 88
     call vec_get
     test rax, rax
     jz done

@@ -22,10 +22,10 @@ STRSRC := $(addprefix $(STRDIR)/, $(addsuffix .s, \
             strlen split strcpy substr is_num strcmp is_alpha \
             ))
 MEMSRC := $(addprefix $(MEMDIR)/, $(addsuffix .s, \
-            malloc memchr memcpy \
+            malloc memchr memcpy memset \
             ))
 VECSRC := $(addprefix $(VECDIR)/, $(addsuffix .s, \
-			vec_create vec_push vec_get\
+			vec_create vec_push vec_get vec_pop \
             ))
 PRINTSRC := $(addprefix $(PRINTDIR)/, $(addsuffix .s, \
             print putnumber \
