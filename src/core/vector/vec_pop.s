@@ -16,6 +16,9 @@ vec_pop:       ; rax: bool (rdi: vec*)
     push rbx
 
     mov eax, dword [rdi + VEC_COUNT]
+    test eax, eax
+    jz .done
+
     mov vec_count, eax
     mov eax, dword [rdi + VEC_MEMBER_SIZE]
     mov vec_member_size, eax
@@ -37,6 +40,7 @@ vec_pop:       ; rax: bool (rdi: vec*)
     pop rdi
     dec dword [rdi + VEC_COUNT]
 
+.done:
     pop rbx
     mov rsp, rbp
     pop rbp
