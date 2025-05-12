@@ -1,9 +1,9 @@
 section .text
 
 is_space:           ; rax: bool (rdi: c)
-    cmp c, 8
+    cmp rdi, 8
     jl .false
-    cmp c, 13
+    cmp rdi, 13
     je .false
 .true:
     mov rax, 1

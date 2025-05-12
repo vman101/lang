@@ -8,15 +8,19 @@ section .text
     extern err_malloc
     extern exit
     extern putstr
+    extern putendl
 
     extern create_expressions
     extern strcmp
     extern get_vars
     extern lex_load
     extern lex_func_call
-
     extern lex_eundefined
 
+    extern func_prologue
+    extern func_epilogue
+
+    extern program_prologue
 
 global lex
 lex:            ; rax: lex* (rdi: char *file_content)
@@ -42,10 +46,18 @@ lex:            ; rax: lex* (rdi: char *file_content)
 
     mov rdi, [rbp - 24]
     mov [rdi + LEX_EXPR], rax
-    mov rax, [rbp - 16]
-    mov [rdi + LEX_EXPR_CNT], rax
+    mov eax, dword [rbp - 16]
+    mov dword [rdi + LEX_EXPR_CNT], eax
 
     call get_vars
+
+    mov rdi, [rbp - 24]
+    call program_prologue
+
+    mov rdi, [rbp - 24]
+    mov edi, dword [rdi + LEX_VAR_CNT]
+
+    call func_prologue
 
     mov rax, [rbp - 24]
     lea rcx, [rax + LEX_EXPR_IDX]
@@ -71,6 +83,7 @@ lex:            ; rax: lex* (rdi: char *file_content)
 
     jmp .process_expressions
 .done:
+    call func_epilogue
     pop rbx
     mov rsp, rbp
     pop rbp

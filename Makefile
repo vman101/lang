@@ -1,3 +1,12 @@
+TARGET := langc
+
+
+AFLAGS = -felf64 -F dwarf -g
+
+ifdef DEBUG
+	AFLAGS += -DDEBUG_BUILD
+endif
+
 SRCDIR := src
 COREDIR := $(SRCDIR)/core
 MATHDIR := $(COREDIR)/math
@@ -43,7 +52,8 @@ EXPRSRC := $(addprefix $(EXPRDIR)/, $(addsuffix .s, \
             create_expressions debug_expression \
             ))
 LEXSRC := $(addprefix $(LEXDIR)/, $(addsuffix .s, \
-            lexer lex_err lex_load lex_func \
+            lexer lex_err lex_load lex_func program_prologue \
+			func_boiler_plate \
             ))
 VARSRC := $(addprefix $(VARDIR)/, $(addsuffix .s, \
             get_vars insert_var \
@@ -59,26 +69,35 @@ SRC := $(SRCDIR)/start.s $(MATHSRC) $(STRSRC) $(PRINTSRC) $(FILESRC) $(VARSRC) $
 OBJDIR := obj
 OBJ := $(patsubst $(SRCDIR)/%.s,$(OBJDIR)/%.o,$(SRC))
 
-all: debug
+LIBOBJ := $(filter-out start.o, $(OBJ))
+LIBNAME := core.lang
+
+all: $(TARGET)
+
+lib: $(OBJ)
+	ar rcs $(LIBNAME) $(LIBOBJ)
 
 # Create output directories
 $(OBJDIR)/core/math $(OBJDIR)/core/string $(OBJDIR)/core/print $(OBJDIR)/core/mem $(OBJDIR)/core/syscall $(OBJDIR)/core/file $(OBJDIR)/parse/expression $(OBJDIR)/parse/token $(OBJDIR)/lexer $(OBJDIR)/lexer/vars $(OBJDIR)/global:
 	mkdir -p $@
 
 # Main target
-debug: $(OBJDIR) $(OBJDIR)/core/math $(OBJDIR)/core/string $(OBJDIR)/core/print $(OBJDIR)/core/mem $(OBJDIR)/core/syscall $(OBJDIR)/core/file $(OBJDIR)/parse/expression $(OBJDIR)/parse/token $(OBJDIR)/lexer $(OBJDIR)/lexer/vars $(OBJDIR)/global $(OBJ)
+$(TARGET): $(OBJDIR) $(OBJDIR)/core/math $(OBJDIR)/core/string $(OBJDIR)/core/print $(OBJDIR)/core/mem $(OBJDIR)/core/syscall $(OBJDIR)/core/file $(OBJDIR)/parse/expression $(OBJDIR)/parse/token $(OBJDIR)/lexer $(OBJDIR)/lexer/vars $(OBJDIR)/global $(OBJ)
 	ld -g -o $@ $(OBJ) -nostdlib -static
 
 # Fix: Use a more specific pattern rule that preserves paths
 $(OBJDIR)/%.o: $(SRCDIR)/%.s
 	mkdir -p $(dir $@)
-	nasm -felf64 -F dwarf -g $< -o $@
+	nasm $(AFLAGS) $< -o $@
 
 $(OBJDIR):
 	mkdir -p $@
 
 clean:
-	rm -rf $(OBJDIR) debug
+	rm -rf $(OBJDIR)
+
+fclean: clean
+	rm -rf $(TARGET)
 
 re: clean all
 

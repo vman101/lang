@@ -107,9 +107,11 @@ create_expressions:         ; rax: exp* (rdi: char *filecontent, rsi: *cnt)
     mov rax, EXPR_SIZE
     mul rcx
     lea rdi, [rbx + rax]
+%ifdef DEBUG_BUILD
     push rcx
     call print_expression
     pop rcx
+%endif
     inc rcx
     jmp .expr_loop_print
 

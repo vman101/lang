@@ -124,7 +124,8 @@ get_vars:           ; (rdi: lex*)
     push rcx
 .loop_expr:
     pop rcx
-    cmp ecx, dword [rdi + LEX_EXPR_CNT]
+    mov ebx, dword [rbp - 8]
+    cmp ecx, ebx
     je .done
     mov rax, EXPR_SIZE
     mul rcx
@@ -156,7 +157,9 @@ get_vars:           ; (rdi: lex*)
     pop rcx
     pop rdi
     cmp rax, 1
+    pop rax
     je .skip_alloc
+    push rax
     mov rax, VAR_SIZE
     mul r9
     lea rbx, [rbx + rax]

@@ -50,6 +50,7 @@ malloc:                     ; RAX: long basic_malloc(RDI: size_t n)
     mov r8, rdi
     push rdi
 
+%ifdef DEBUG_BUILD
     mov rdi, success
     call putstr
     mov rdi, r8
@@ -63,6 +64,7 @@ malloc:                     ; RAX: long basic_malloc(RDI: size_t n)
     mov rdi, str_bytecnt
     call putendl
 
+%endif
     pop rax
     sub rax, rbx
     pop rbx

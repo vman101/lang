@@ -1,16 +1,17 @@
 section .data
-    func_syms: db \
-        "putnumber", 0 \
+    putnumber_func: db "putnumber", 0
+    exit_func: db "exit", 0
 
     global ftable
-    ftable: dq 1,        \
-            func_syms
-    global func_prologue
-    func_prologue:  db "push rdi", 0
+    ftable: dq 2,        \
+        putnumber_func, \
+        exit_func
+
+    global func_call_prologue
+    func_call_prologue:  db "    push rdi", 0
 
     global func_call
-    func_call:      db "call ", 0
+    func_call:      db "    call ", 0
 
-    global func_epilogue
-    func_epilogue:  db "pop rdi", 0
-
+    global func_call_epilogue
+    func_call_epilogue:  db "    pop rdi", 0

@@ -8,8 +8,8 @@
 section .data
     err_func_args_message: db FUNC_ERR, "invalid argument", 0
     extern func_call
-    extern func_prologue
-    extern func_epilogue
+    extern func_call_prologue
+    extern func_call_epilogue
     extern REG_RDI
 
 section .text
@@ -19,12 +19,14 @@ section .text
     extern lex_eundefined
     extern putstr
     extern putendl
+    extern putnumberendl
     extern exit
     extern look_up_var
     extern insert_mov
     extern load_var_reg
+    extern load_const_reg
 
-insert_func:    ; (rdi: name*, rsi: arg*)
+insert_func_with_const:    ; (rdi: name*, rsi: arg*)
     push rbp
     mov rbp, rsp
     sub rsp, 16
@@ -32,7 +34,32 @@ insert_func:    ; (rdi: name*, rsi: arg*)
     mov [rbp - 8], rdi  ; store name
     mov [rbp - 16], rsi ; store arg
 
-    mov rdi, func_prologue
+    mov rdi, func_call_prologue
+    call putendl
+
+    mov rdi, [rbp - 16]
+    mov rsi, REG_RDI
+    call load_const_reg
+    mov rdi, func_call
+    call putstr
+    mov rdi, [rbp - 8]
+    call putendl
+    mov rdi, func_call_epilogue
+    call putendl
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+insert_func_with_var:    ; (rdi: name*, rsi: arg*)
+    push rbp
+    mov rbp, rsp
+    sub rsp, 16
+
+    mov [rbp - 8], rdi  ; store name
+    mov [rbp - 16], rsi ; store arg
+
+    mov rdi, func_call_prologue
     call putendl
 
     mov rdi, [rbp - 16]
@@ -42,7 +69,7 @@ insert_func:    ; (rdi: name*, rsi: arg*)
     call putstr
     mov rdi, [rbp - 8]
     call putendl
-    mov rdi, func_epilogue
+    mov rdi, func_call_epilogue
     call putendl
 
     mov rsp, rbp
@@ -59,8 +86,7 @@ err_func_args:
 global look_up_func
 look_up_func:           ; (rdi: name*)
     push rbx
-    lea rdx, [ftable]
-    mov rbx, [rdx + FTABLE_COUNT]
+    mov rbx, FTABLE_COUNT
     xor rcx, rcx
 
 .search_func:
@@ -68,9 +94,14 @@ look_up_func:           ; (rdi: name*)
     je .done_false
 
     ; rdi still contains name
-    mov rsi, [rdx + FTABLE_SYM]
+    push rcx
+    mov rax, FTABLE_SYM
+    inc rcx
+    imul rax, rcx
+    mov rsi, [ftable + rax]
     call strcmp
     test rax, rax
+    pop rcx
     jz .done_true
 
     inc rcx
@@ -132,6 +163,10 @@ lex_func_call:           ;   rax: bool (rdi :lex *)
     call err_func_args
 
 .arg_const:
+    mov rdi, [rbp - 24]
+    mov rsi, [rsi + TOK_VALUE]
+    call insert_func_with_const
+    jmp .done
 
 .arg_var:
     mov rdi, [rbp - 8]
@@ -139,7 +174,7 @@ lex_func_call:           ;   rax: bool (rdi :lex *)
     call look_up_var
     mov rsi, rax
     mov rdi, [rbp - 24]
-    call insert_func
+    call insert_func_with_var
 
 
 .done:
