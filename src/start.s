@@ -13,31 +13,40 @@ section .text
     extern vec_get
     extern putchar
     extern vec_pop
+    extern sb_new
 
 print_usage:
     mov rdi, usage
     call putstr
 
+
 _start:
-    pop rdi
-    cmp rdi, 2
-    jne err_args
-    mov rdi, [rsp + 8]          ; argv[1]
     push rbp
     mov rbp, rsp
-
     sub rsp, 16
+    mov rdi, usage
+    lea rsi, [rsp - 16]
+    call sb_new
 
-    call get_file_content
-    mov rdi, rax
-    mov [rbp - 8], rax
-
-    mov rdi, rax
-    call lex
-
-    mov rsp, rbp
-    pop rbp
-
+;    pop rdi
+;    cmp rdi, 2
+;    jne err_args
+;    mov rdi, [rsp + 8]          ; argv[1]
+;    push rbp
+;    mov rbp, rsp
+;
+;    sub rsp, 16
+;
+;    call get_file_content
+;    mov rdi, rax
+;    mov [rbp - 8], rax
+;
+;    mov rdi, rax
+;    call lex
+;
+;    mov rsp, rbp
+;    pop rbp
+;
 done:
-    xor rdi, rdi
-    call exit
+;    xor rdi, rdi
+;    call exit

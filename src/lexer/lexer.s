@@ -19,6 +19,7 @@ section .text
 
     extern func_prologue
     extern func_epilogue
+    extern memset
 
     extern program_prologue
 
@@ -37,6 +38,14 @@ lex:            ; rax: lex* (rdi: char *file_content)
     cmp rax, 0
     je err_malloc
 
+    ; zero out lexer
+    push rax
+    mov rdi, rax
+    mov rsi, 0
+    mov rdx, LEX_SIZE
+    call memset
+
+    pop rax
     mov [rbp - 24], rax     ; store lex on stack
 
     lea rsi, [rbp - 16]     ; int* expr_cnt

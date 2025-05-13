@@ -1,7 +1,7 @@
 section .data
-    EARGCNT: db "[ERROR] Invalid arg count: expected 1", 0xa, 0
-    EMALLOC: db "[ERROR] Malloc fialed!", 0xa, 0
-    ELSEEK: db "[ERROR] lseek failed!", 0xa, 0
+    EARGCNT: db 0xa, "[ERROR] Invalid arg count: expected 1", 0xa, 0
+    EMALLOC: db 0xa, "[ERROR] Malloc failed!", 0xa, 0
+    ELSEEK: db 0xa, "[ERROR] lseek failed!", 0xa, 0
 
 section .text
     global err_args
