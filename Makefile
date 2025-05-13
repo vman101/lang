@@ -120,7 +120,7 @@ GLOBALSRC := $(addprefix $(GLOBALDIR)/, $(addsuffix .s, \
             ))
 
 SBSRC := $(addprefix $(SBDIR)/, $(addsuffix .s, \
-			string_builder\
+			string_builder sb_append \
             ))
 
 # Collect all sources and objects

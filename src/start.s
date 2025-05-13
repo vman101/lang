@@ -1,5 +1,8 @@
+%include "./src/core/string_builder/sb.s"
+
 section .data
     usage:  db "Usage: ./debug <file>.lang", 0xa, 0
+    example_data: db "Do you know Ligma?"
 
 section .text
     global _start
@@ -14,6 +17,7 @@ section .text
     extern putchar
     extern vec_pop
     extern sb_new
+    extern sb_append
 
 print_usage:
     mov rdi, usage
@@ -25,8 +29,16 @@ _start:
     mov rbp, rsp
     sub rsp, 16
     mov rdi, usage
-    lea rsi, [rsp - 16]
+    lea rsi, [rbp - 16]
     call sb_new
+
+    mov rdi, [rbp - 16 + STR_DATA]
+    call putstr
+    lea rdi, [rbp - 16]
+    mov rsi, example_data
+    call sb_append
+    mov rdi, [rbp - 16 + STR_DATA]
+    call putstr
 
 ;    pop rdi
 ;    cmp rdi, 2
@@ -44,9 +56,9 @@ _start:
 ;    mov rdi, rax
 ;    call lex
 ;
-;    mov rsp, rbp
-;    pop rbp
-;
+   mov rsp, rbp
+   pop rbp
+
 done:
-;    xor rdi, rdi
-;    call exit
+   xor rdi, rdi
+   call exit

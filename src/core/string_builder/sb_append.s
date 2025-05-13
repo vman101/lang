@@ -2,15 +2,17 @@
 
 section .text
     extern strlen
-    extern strcpy
+    extern memcpy
     extern malloc
     extern err_malloc
 
 %define SB [rbp - 16]
-%define SB_LEN [rbp - 4]
-%define SB_CAP [rbp - 8]
+%define SB_LEN dword [rbp - 4]
+%define SB_CAP dword [rbp - 8]
 %define APPENDIX [rbp - 24]
+%define APP_LEN dword [rbp - 28]
 
+global sb_append
 sb_append:      ; (rdi: *sb, rsi: char*)
     push rbp
     mov rbp, rsp
@@ -26,26 +28,28 @@ sb_append:      ; (rdi: *sb, rsi: char*)
 
     ; get sb len
     mov eax, dword [rdi + STR_LEN]
-    mov dword SB_LEN, eax
+    mov SB_LEN, eax
 
     mov eax, dword [rdi + STR_CAP]
-    mov dword SB_CAP, eax
+    mov SB_CAP, eax
 
     push rdi
     mov rdi, rsi
     call strlen
 
-    add rax, SB_LEN
-    cmp rax, SB_CAP
+    mov APP_LEN, eax
+
+    add eax, SB_LEN
+    cmp eax, SB_CAP
     jl .copy_string
 
-    mov r9, SB_CAP
+    mov r9d, SB_CAP
     ; new string will be to large for current cap, need to realloc
 .get_new_len:
     imul r9, 2
     cmp r9, rax
     jl .get_new_len
-    mov SB_CAP, r9
+    mov SB_CAP, r9d
     push r9
     push rax
     mov rdi, r9
@@ -55,11 +59,12 @@ sb_append:      ; (rdi: *sb, rsi: char*)
     mov rdi, rax
     mov rsi, SB
     mov rsi, [rsi + STR_DATA]
-    call strcpy
+    mov edx, SB_LEN
+    call memcpy
     pop rax
     mov rsi, SB
     pop r9
-    mov [SB + STR_CAP], r9
+    mov [rsi + STR_CAP], r9
 
 .copy_string:
     pop rdi
@@ -67,9 +72,10 @@ sb_append:      ; (rdi: *sb, rsi: char*)
     mov dword [r9 + STR_LEN], eax
     mov rdi, [r9 + STR_DATA]
     mov eax, dword [rbp - 4]
-    lea rdi, [rdi + eax]
-    mov rsi, [rbp - 24]
-    call strcpy
+    lea rdi, [rdi + rax]
+    mov rsi, APPENDIX
+    mov edx, APP_LEN
+    call memcpy
 
 .done:
     mov rsp, rbp

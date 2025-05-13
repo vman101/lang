@@ -10,7 +10,6 @@ section .text
 global sb_new
 sb_new:     ; rax: str*(rdi: char* || NULL, rsi: *hidden_copy_ptr)
     push rbx
-    push rdi
     push rsi
 
     mov rbx, STRING_INIT_CAP
@@ -31,7 +30,6 @@ sb_new:     ; rax: str*(rdi: char* || NULL, rsi: *hidden_copy_ptr)
     cmp r9, rbx
     jg .calc_init_len
 
-
 .alloc_string:
     push rdi
     mov rdi, rbx
@@ -46,9 +44,10 @@ sb_new:     ; rax: str*(rdi: char* || NULL, rsi: *hidden_copy_ptr)
     mov [rsi + STR_DATA], rax
     test r9, r9
     jz .done
+    push rdi
     mov rdi, rax
-    mov rdx, r9
     pop rsi
+    mov rdx, r9
     call memcpy
 
 .done:
