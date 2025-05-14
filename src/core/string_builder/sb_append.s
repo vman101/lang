@@ -5,6 +5,8 @@ section .text
     extern memcpy
     extern malloc
     extern err_malloc
+    extern ft_strlcpy
+    extern ft_strlcat
 
 %define SB [rbp - 16]
 %define SB_LEN dword [rbp - 4]
@@ -60,7 +62,7 @@ sb_append:      ; (rdi: *sb, rsi: char*)
     mov rsi, SB
     mov rsi, [rsi + STR_DATA]
     mov edx, SB_LEN
-    call memcpy
+    call ft_strlcpy
     pop rax
     mov rsi, SB
     pop r9
@@ -72,10 +74,9 @@ sb_append:      ; (rdi: *sb, rsi: char*)
     mov dword [r9 + STR_LEN], eax
     mov rdi, [r9 + STR_DATA]
     mov eax, dword [rbp - 4]
-    lea rdi, [rdi + rax]
     mov rsi, APPENDIX
-    mov edx, APP_LEN
-    call memcpy
+    mov edx, SB_CAP
+    call ft_strlcat
 
 .done:
     mov rsp, rbp

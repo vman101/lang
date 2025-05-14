@@ -1,35 +1,40 @@
+%include "./src/inc/c_alignment.s"
 %include "./src/inc/lexer.s"
 %include "./src/inc/token.s"
 %include "./src/inc/expression.s"
 
 section .data
-    section_text: db "section .text", 0xa, 0
-    program_start: db "global _start", 0xa, "_start:", 0xa, 0
-    extern_str: db "extern ", 0
+    prologue: db "section .text", 0xa, 0
+    program_entry: db "global _start", 0xa, "_start:", 0xa, 0
+    extern_str: db "extern %s", 0x0a, 0
 
 
 section .text
     extern putendl
     extern putstr
+    extern fd_out
+    extern ft_fprintf
 
     global program_prologue
 
-print_section_text:
-    mov rdi, section_text
-    call putstr
+print_program_entry:
+    mov rdi, [fd_out]
+    mov rsi, program_entry
+    c_call ft_fprintf
     ret
 
-print_program_start:
-    mov rdi, program_start
-    call putendl
+print_section_text:
+    mov rdi, [fd_out]
+    mov rsi, prologue
+    c_call ft_fprintf
     ret
 
 declare_extern:         ; (rdi: func_name*)
     push rdi
-    mov rdi, extern_str
-    call putstr
-    pop rdi
-    call putendl
+    mov rdi, [fd_out]
+    mov rsi, extern_str
+    pop rdx
+    c_call ft_fprintf
     ret
 
 declare_extern_func:    ;(rdi: lex*)
@@ -88,9 +93,8 @@ declare_extern_func:    ;(rdi: lex*)
 
 program_prologue:   ;(rdi: lex*)
     push rdi
-    mov rdi, section_text
-    call putendl
+    call print_section_text
     pop rdi
     call declare_extern_func
-    call print_program_start
+    call print_program_entry
     ret

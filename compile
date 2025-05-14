@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -e
+
+LD_ARGS="-nostdlib -static"
+NASM_FLAG="-felf64 -g"
+LIBS="./lib/core/core.a ./lib/libft/lib/libft.a"
+PROGNAME="langproc"
+
+filename=$1
+comp_out=${filename%.lang}.s
+nasm_out=${comp_output%.s}.o
+
+./langc ${filename}
+
+nasm ${NASM_FLAG} ${comp_out} -o ${nasm_out}
+ld ${nasm_out} ${LD_ARGS} ${LIBS} -o ${PROGNAME}
+rm -rf ${comp_out} ${nasm_out}

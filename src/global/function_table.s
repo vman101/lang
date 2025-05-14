@@ -8,10 +8,10 @@ section .data
         exit_func
 
     global func_call_prologue
-    func_call_prologue:  db "    push rdi", 0
+    func_call_prologue:  db "    push rdi", 0x0a, 0
 
     global func_call
-    func_call:      db "    call ", 0
+    func_call:      db "    call %s", 0x0a, 0
 
     global func_call_epilogue
-    func_call_epilogue:  db "    pop rdi", 0
+    func_call_epilogue:  db "    pop rdi", 0x0a, 0

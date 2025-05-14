@@ -75,7 +75,7 @@ MATHSRC := $(addprefix $(MATHDIR)/, $(addsuffix .s, \
             ))
 
 STRSRC := $(addprefix $(STRDIR)/, $(addsuffix .s, \
-            strlen split strcpy substr is_num strcmp is_alpha \
+            strlen split strdup substr is_num strcmp is_alpha \
             ))
 
 MEMSRC := $(addprefix $(MEMDIR)/, $(addsuffix .s, \
@@ -120,7 +120,7 @@ GLOBALSRC := $(addprefix $(GLOBALDIR)/, $(addsuffix .s, \
             ))
 
 SBSRC := $(addprefix $(SBDIR)/, $(addsuffix .s, \
-			string_builder sb_append \
+			string_builder sb_append sb_dump_to_file \
             ))
 
 # Collect all sources and objects
@@ -131,7 +131,9 @@ ALL_SRC := $(MAIN_SRC) $(MATHSRC) $(STRSRC) $(SBSRC) $(PRINTSRC) $(FILESRC) $(VA
 ALL_OBJ := $(patsubst $(SRCDIR)/%.s,$(OBJDIR)/%.o,$(ALL_SRC))
 
 # Library settings
-LIBNAME := $(LIBDIR)/core.a
+LIBNAME := $(LIBDIR)/core/core.a
+LIBFTDIR := $(LIBDIR)/libft
+LIBFT	:= $(LIBFTDIR)/lib/libft.a
 LIB_OBJ := $(filter-out $(OBJDIR)/start.o, $(ALL_OBJ))
 
 # Module-specific object files for staged compilation
@@ -206,14 +208,17 @@ build-main: $(MAIN_OBJ)
 # Stage 7: Link executable
 link-executable: $(TARGET)
 
-$(TARGET): $(ALL_OBJ)
-	ld -g -o $@ $(ALL_OBJ) -nostdlib -static
+$(TARGET): $(ALL_OBJ) $(LIBFT) $(LIBNAME)
+	ld -g -o $@ $(ALL_OBJ) $(LIBFT) $(LIBNAME) -nostdlib -static
 
 # Stage 8: Create library
 create-library: $(LIBNAME)
 
 $(LIBNAME): $(LIB_OBJ) | $(LIBDIR)
 	ar rcs $@ $(LIB_OBJ)
+
+$(LIBFT):
+	make -C $(LIBFTDIR)
 
 # Individual file compilation rule
 $(OBJDIR)/%.o: $(SRCDIR)/%.s | $(OBJDIRS)
@@ -222,6 +227,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.s | $(OBJDIRS)
 # Utility targets
 clean:
 	rm -rf $(OBJDIR)
+	make clean -C $(LIBFTDIR)
 
 clean-library:
 	rm -f $(LIBNAME)
@@ -230,6 +236,7 @@ clean-executable:
 	rm -f $(TARGET)
 
 fclean: clean clean-library clean-executable
+	make fclean -C $(LIBFTDIR)
 
 re: fclean all
 

@@ -1,15 +1,22 @@
 %include "./src/inc/token.s"
+%include "./src/inc/c_alignment.s"
+
 
 section .data
 
     INST_MOV: db "    mov ", 0
     INST_ADD: db "    add ", 0
     INST_SUB: db "    sub ", 0
-    INST_XOR: db "    xor ", 0
+    INST_XOR: db "    xor %s, %s", 0x0a, 0
 
-    OPEN_STACK_VAR: db "[rbp-", 0
-    CLOSE_STACK_VAR: db "]", 0
-    SEP_INST: db ", ", 0
+    OPERAND_PAIR_CONST_REG: db "%s, %s", 0x0a, 0
+    OPERAND_PAIR_CONST: db "%s, %s", 0x0a, 0
+    OPERAND_PAIR_REG_VAR: db "[rbp-%d], %s", 0x0a, 0
+    OPERAND_PAIR_VAR_REG: db "%s, [rbp-%d]", 0x0a, 0
+
+    LOAD_REG_VAR: db "    mov [rbp-%d], %s", 0x0a, 0
+    LOAD_VAR_REG: db "    mov %s, [rbp-%d]", 0x0a, 0
+    LOAD_CONST_REG: db "    mov %s, %s", 0x0a, 0
 
 section .text
     extern putstr
@@ -26,28 +33,26 @@ section .text
     extern REG_RAX
     extern REG_RDI
 
-global insert_xor
-insert_xor:
-    mov rdi, INST_XOR
-    call putstr
-    ret
+    extern ft_fprintf
 
-global insert_mov
-insert_mov:
-    mov rdi, INST_MOV
-    call putstr
-    ret
+    extern fd_out
 
 global insert_add
 insert_add:
-    mov rdi, INST_ADD
-    call putstr
+    mov rdi, [fd_out]
+    mov rsi, INST_ADD
+
+    c_call ft_fprintf
+
     ret
 
 global insert_sub
 insert_sub:
-    mov rdi, INST_SUB
-    call putstr
+    mov rdi, [fd_out]
+    mov rsi, INST_SUB
+
+    c_call ft_fprintf
+
     ret
 
 global xor_reg
@@ -55,35 +60,37 @@ xor_reg:               ; rdi: char*
     push rbx
     mov rbx, rdi
 
-    call insert_xor
+    mov rdi, [fd_out]
+    mov rsi, INST_XOR
+    mov rdx, rbx
+    mov rcx, rbx
 
-    mov rdi, rbx
-    call putstr
-
-    mov rdi, SEP_INST
-    call putstr
-
-    mov rdi, rbx
-    call putendl
+    c_call ft_fprintf
 
     pop rbx
+    ret
+
+global load_var_reg
+load_var_reg:           ; (rdi: OFF_S, rsi: REG*)
+    push rsi
+    push rdi
+    mov rdi, [fd_out]
+    mov rsi, LOAD_VAR_REG
+    pop rcx
+    pop rdx
+
+    c_call ft_fprintf
     ret
 
 global load_reg_var
 load_reg_var:           ; (rdi: OFF_S, rsi: REG*)
     push rsi
     push rdi
-    call insert_mov
-
-    pop rdi
-    call insert_var
-
-    mov rdi, SEP_INST
-    call putstr
-
-    pop rdi
-    call putendl
-
+    mov rdi, [fd_out]
+    mov rsi, LOAD_REG_VAR
+    pop rdx
+    pop rcx
+    c_call ft_fprintf
     ret
 
 global load_const_reg
@@ -91,75 +98,19 @@ load_const_reg:           ; (rdi: const*, rsi: REG*)
     push rdi
     push rsi
 
-    call insert_mov
+    mov rdi, [fd_out]
+    mov rsi, LOAD_CONST_REG
+    pop rdx
+    pop rcx
 
-    pop rdi
-    call putstr
-
-    mov rdi, SEP_INST
-    call putstr
-
-    pop rdi
-    call insert_const_endl
+    c_call ft_fprintf
 
     ret
 
-global load_var_reg
-load_var_reg:           ; (rdi: OFF_S, rsi: REG*)
+global op_const_reg
+op_const_reg:          ; (rdi: char *, rsi: op, rdx: reg*)
     push rdi
-    push rsi
-
-    call insert_mov
-
-    pop rdi
-    call putstr
-
-    mov rdi, SEP_INST
-    call putstr
-
-    pop rdi
-    call insert_var_endl
-
-    ret
-
-global load_rax_var
-load_rax_var:           ; (rdi: OFF_S)
-    push rdi
-    call insert_mov
-
-    pop rdi
-    call insert_var
-
-    mov rdi, SEP_INST
-    call putstr
-
-    mov rdi, REG_RAX
-    call putendl
-
-    ret
-
-global load_var_rax
-load_var_rax:           ; (rdi: OFF_S)
-    push rdi
-    call insert_mov
-
-    mov rdi, REG_RAX
-    call putstr
-
-    mov rdi , SEP_INST
-    call putstr
-
-    pop rdi
-    call insert_var_endl
-
-    mov rdi, '\n'
-    call putchar
-
-    ret
-
-global op_const_rax
-op_const_rax:          ; (rdi: char *, rsi: op)
-    push rdi
+    push rdx
 
     cmp rsi, TOK_SUB
     je .sub
@@ -171,20 +122,20 @@ op_const_rax:          ; (rdi: char *, rsi: op)
     call insert_add
 
 .done:
-    mov rdi, REG_RAX
-    call putstr
+    pop rdx
+    pop rcx
 
-    mov rdi, SEP_INST
-    call  putstr
+    mov rdi, [fd_out]
+    mov rsi, OPERAND_PAIR_CONST_REG
 
-    pop rdi
-    call putendl
+    c_call ft_fprintf
 
     ret
 
-global op_var_rax
-op_var_rax:          ; (rdi: OFF_S, rsi: op)
+global op_var_reg
+op_var_reg:          ; (rdi: OFF_S, rsi: op, rdx: reg)
     push rdi
+    push rdx
 
     cmp rsi, TOK_SUB
     je .sub
@@ -196,95 +147,12 @@ op_var_rax:          ; (rdi: OFF_S, rsi: op)
     call insert_add
 .done:
 
-    mov rdi, REG_RAX
-    call putstr
+    pop rdx
+    pop rcx
 
-    mov rdi, SEP_INST
-    call  putstr
+    mov rdi, [fd_out]
+    mov rsi, OPERAND_PAIR_VAR_REG
 
-    pop rdi
-    call insert_var_endl
-
-    ret
-
-global sub_var_rax
-sub_var_rax:            ; (rdi: OFF_S)
-    push rdi
-    call insert_sub
-
-    mov rdi, REG_RAX
-    call putstr
-
-    mov rdi , SEP_INST
-    call putstr
-
-    pop rdi
-    call insert_var_endl
-
-    ret
-
-global add_rax_var
-add_rax_var:            ; (rdi: OFF_S)
-    push rdi
-    call insert_add
-
-    pop rdi
-    call insert_var
-
-    mov rdi , SEP_INST
-    call putstr
-
-    mov rdi, REG_RAX
-    call putendl
-
-    ret
-
-global sub_rax_var
-sub_rax_var:            ; (rdi: OFF_S)
-    push rdi
-    call insert_sub
-
-    pop rdi
-    call insert_var
-
-    mov rdi , SEP_INST
-    call putstr
-
-    mov rdi, REG_RAX
-    call putendl
-
-    ret
-
-insert_const_endl:             ; (rdi: const*)
-    push rdi
-    call putendl
-    pop rdi
-
-    ret
-
-insert_var_endl:             ; (rdi: OFF_S)
-    push rdi
-    mov rdi, OPEN_STACK_VAR
-    call putstr
-
-    pop rdi
-    call putnumber
-
-    mov rdi, CLOSE_STACK_VAR
-    call putendl
-
-    ret
-
-global insert_var
-insert_var:             ; (rdi: OFF_S)
-    push rdi
-    mov rdi, OPEN_STACK_VAR
-    call putstr
-
-    pop rdi
-    call putnumber
-
-    mov rdi, CLOSE_STACK_VAR
-    call putstr
+    c_call ft_fprintf
 
     ret

@@ -4,7 +4,7 @@ section .text
     extern malloc
     extern putstr
     extern putnumber
-    extern strcpy
+    extern strdup
     extern memchr
     extern substr
     extern strlen
@@ -121,7 +121,7 @@ split:              ; RAX: char ** split(RDI: char *, RSI: int)
     jmp .cleanup
 .no_match:
     push rcx
-    call strcpy
+    call strdup
     pop rcx
     mov [rcx], rax
 .done:

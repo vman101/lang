@@ -5,18 +5,24 @@ section .text
     global read
     global get_file_size
     global lseek
+    global write
 
-open:              ; rax: int fd (rdi: char *name, rsi: int flags)
-    mov rax, 2          ; sys_open
+write:              ; write(RDI: int fd, RSI: char *buffer, RDX: size_t size)
+    mov rax, 1
+    syscall
+    ret
+
+open:               ; rax: int fd (rdi: char *name, rsi: int flags)
+    mov rax, 2      ; sys_open
     syscall
     ret
 
 close:
-    mov rax, 3         ; sys_close
+    mov rax, 3      ; sys_close
     syscall
     ret
 
-read:    ; read(RDI: int fd, RSI: char *buffer, RDX: size_t size)
+read:               ; read(RDI: int fd, RSI: char *buffer, RDX: size_t size)
     mov rax, 0      ; sys_read
     syscall         ;
     ret

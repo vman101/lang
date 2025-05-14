@@ -2,6 +2,7 @@
 %include "./src/inc/expression.s"
 %include "./src/inc/function_table.s"
 %include "./src/inc/token.s"
+%include "./src/inc/c_alignment.s"
 
 %define FUNC_ERR    "[FUNC_ERROR]"
 
@@ -11,6 +12,8 @@ section .data
     extern func_call_prologue
     extern func_call_epilogue
     extern REG_RDI
+    extern REG_RAX
+    extern fd_out
 
 section .text
     global lex_func_call
@@ -25,6 +28,7 @@ section .text
     extern insert_mov
     extern load_var_reg
     extern load_const_reg
+    extern ft_fprintf
 
 insert_func_with_const:    ; (rdi: name*, rsi: arg*)
     push rbp
@@ -34,18 +38,22 @@ insert_func_with_const:    ; (rdi: name*, rsi: arg*)
     mov [rbp - 8], rdi  ; store name
     mov [rbp - 16], rsi ; store arg
 
-    mov rdi, func_call_prologue
-    call putendl
+    mov rdi, [fd_out]
+    mov rsi, func_call_prologue
+    call ft_fprintf
 
     mov rdi, [rbp - 16]
     mov rsi, REG_RDI
+    mov rdx, REG_RAX
     call load_const_reg
-    mov rdi, func_call
-    call putstr
-    mov rdi, [rbp - 8]
-    call putendl
+    mov rdi, [fd_out]
+    mov rsi, func_call
+    mov rdx, [rbp - 8]
+    c_call ft_fprintf
+
+    mov rdi, [fd_out]
     mov rdi, func_call_epilogue
-    call putendl
+    c_call ft_fprintf
 
     mov rsp, rbp
     pop rbp
@@ -59,18 +67,21 @@ insert_func_with_var:    ; (rdi: name*, rsi: arg*)
     mov [rbp - 8], rdi  ; store name
     mov [rbp - 16], rsi ; store arg
 
-    mov rdi, func_call_prologue
-    call putendl
+    mov rdi, [fd_out]
+    mov rsi, func_call_prologue
+    call ft_fprintf
 
     mov rdi, [rbp - 16]
     mov rsi, REG_RDI
     call load_var_reg
-    mov rdi, func_call
-    call putstr
-    mov rdi, [rbp - 8]
-    call putendl
+    mov rdi, [fd_out]
+    mov rsi, func_call
+    mov rdx, [rbp - 8]
+    c_call ft_fprintf
+
+    mov rdi, [fd_out]
     mov rdi, func_call_epilogue
-    call putendl
+    c_call ft_fprintf
 
     mov rsp, rbp
     pop rbp

@@ -20,11 +20,12 @@ section .text
     extern insert_var
     extern insert_mov
     extern load_var_rax
-    extern load_rax_var
-    extern op_const_rax
-    extern op_var_rax
+    extern load_reg_var
+    extern op_const_reg
+    extern op_var_reg
     extern xor_reg
     extern look_up_var
+
 
     extern REG_RAX
 
@@ -50,7 +51,8 @@ process_var:        ; (rdi: lex*, rsi: name*, rdx: tok_op)
 
     mov rdi, rax
     mov rsi, rdx
-    call op_var_rax
+    mov rdx, REG_RAX
+    call op_var_reg
 
     mov rsp, rbp
     pop rbp
@@ -85,7 +87,9 @@ process_token:      ; rax: new_last_tok_type (rdi: lex*, rsi: *tok, rdx: last_to
     mov rdi, [rsi + TOK_VALUE]
     mov rsi, rdx
 
-    call op_const_rax
+    mov rdx, REG_RAX
+
+    call op_const_reg
 
     pop rdi
     mov rax, TOK_CONST
@@ -199,7 +203,8 @@ lex_load:     ; rax: bool (rdi: lex*)
 
 .done_true:
     mov rdi, [rbp - 40]
-    call load_rax_var
+    mov rsi, REG_RAX
+    call load_reg_var
     mov rax, 1
     mov rsp, rbp
     pop rbp

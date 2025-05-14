@@ -1,10 +1,10 @@
-global strcpy
+global strdup
 
 section .text
     extern malloc
     extern strlen
 
-strcpy:         ; rax: char *(rdi: char *)
+strdup:         ; rax: char *(rdi: char *)
     push rbx
     push rcx
     call strlen
